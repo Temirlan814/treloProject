@@ -1,0 +1,66 @@
+.column {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+}
+
+.column-header {
+    position: relative;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: grab;
+    user-select: none;
+}
+
+.column-menu {
+    cursor: pointer;
+    padding: 0 6px;
+    font-weight: bold;
+}
+
+.column-menu-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    z-index: 10;
+}
+
+.dropdown-item {
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: #f0f0f0;
+}
+
+.edit-column-title {
+    display: flex;
+    gap: 6px;
+}
+
+.tasks-container {
+    flex: 1;
+    padding: 10px;
+}
+
+.add-task-button {
+    padding: 8px;
+    text-align: center;
+    background-color: #f4f4f4;
+    cursor: pointer;
+    border-top: 1px solid #ddd;
+}
+
+.add-task-button:hover {
+    background-color: #ebecf0;
+}

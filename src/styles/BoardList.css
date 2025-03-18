@@ -1,0 +1,96 @@
+.sidebar {
+    width: 220px;
+    background-color: #fff;
+    border-right: 1px solid #ddd;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+h2 {
+    margin: 0 0 16px 0;
+}
+
+.add-board-button {
+    padding: 6px 12px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 16px;
+}
+
+.add-board-form {
+    background-color: #f5f5f5;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+
+.add-board-form input {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+.buttons-row {
+    display: flex;
+    gap: 8px;
+}
+
+.black-button {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.white-button {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #ccc;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.boards-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.board-item {
+    position: relative;
+    padding: 8px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.board-item:hover {
+    background-color: #f0f0f0;
+}
+
+.active-board {
+    background-color: #ebecf0;
+}
+
+.board-actions {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    display: flex;
+    gap: 4px;
+}
+
+.edit-board-title {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+}

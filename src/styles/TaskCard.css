@@ -1,0 +1,49 @@
+.task-card {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    padding: 8px;
+    cursor: grab;
+    transition: background-color 0.2s;
+    position: relative;
+}
+
+.task-card:hover {
+    background-color: #fafafa;
+}
+
+.task-card-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.task-title {
+    font-weight: bold;
+}
+
+.task-menu {
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 6px;
+    user-select: none;
+}
+
+.task-menu-dropdown {
+    position: absolute;
+    top: 30px;
+    right: 6px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    z-index: 10;
+}
+
+.task-menu-dropdown .dropdown-item {
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.task-menu-dropdown .dropdown-item:hover {
+    background-color: #f0f0f0;
+}
