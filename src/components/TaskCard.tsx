@@ -4,16 +4,19 @@ import { Draggable } from '@hello-pangea/dnd';
 import { ColumnType, TaskType } from '../App';
 import TaskModal from './TaskModal';
 import '../styles/TaskCard.css';
+import {deleteTaskFromColumn, updateTaskInColumn} from "../api/TaskApi.ts";
 
 interface TaskCardProps {
     task: TaskType;
     index: number;
     allColumns: ColumnType[];
     columnId: string;
+    boardId: string; // ← ✅ Добавляем
     setColumns: (cols: ColumnType[]) => void;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
+                                               boardId,
                                                task,
                                                index,
                                                allColumns,
@@ -24,30 +27,18 @@ const TaskCard: React.FC<TaskCardProps> = ({
     const [showEditModal, setShowEditModal] = useState(false);
 
     const handleDelete = () => {
-        const newCols = allColumns.map((col) => {
-            if (col.id === columnId) {
-                return {
-                    ...col,
-                    tasks: col.tasks.filter((t) => t.id !== task.id),
-                };
-            }
-            return col;
-        });
-        setColumns(newCols);
+        deleteTaskFromColumn(boardId, columnId, task.id, allColumns)
+            .then(updated => setColumns(updated))
+            .catch(err => console.error('Failed to delete task', err));
+
     };
 
     const handleSaveEdit = (title: string, desc: string, tags: string[]) => {
         // Обновить задачу в state
-        const newCols = allColumns.map((col) => {
-            if (col.id !== columnId) return col;
-            return {
-                ...col,
-                tasks: col.tasks.map((t) =>
-                    t.id === task.id ? { ...t, title, description: desc, tags } : t
-                ),
-            };
-        });
-        setColumns(newCols);
+        updateTaskInColumn(boardId, columnId, task.id, { title, description: desc, tags }, allColumns)
+            .then(updated => setColumns(updated))
+            .catch(err => console.error('Failed to update task', err));
+
     };
 
     return (

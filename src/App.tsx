@@ -1,8 +1,9 @@
 // src/App.tsx
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import BoardList from './components/BoardList';
 import Board from './components/Board';
 import './styles/App.css';
+import {createBoard, deleteBoardApi, fetchBoards, updateBoard} from "./api/BoardApi.ts";
 
 export interface TaskType {
     id: string;
@@ -23,39 +24,23 @@ export interface BoardType {
     columns: ColumnType[];
 }
 
+
 const App: React.FC = () => {
-    const [boards, setBoards] = useState<BoardType[]>([
-        {
-            id: 'board-1',
-            title: 'Фмыс ч',
-            columns: [
-                {
-                    id: 'col-1',
-                    title: 'casZ',
-                    tasks: [
-                        { id: 'task-1', title: 'Задача 1', description: 'Описание 1' },
-                        { id: 'task-2', title: 'Задача 2', description: 'Описание 2', tags: ['tag1'] },
-                    ],
-                },
-            ],
-        },
-        {
-            id: 'board-2',
-            title: 'Фваыс',
-            columns: [
-                {
-                    id: 'col-2',
-                    title: 'Another Column',
-                    tasks: [{ id: 'task-3', title: 'Задача 3' }],
-                },
-            ],
-        },
-    ]);
+    const [boards, setBoards] = useState<BoardType[]>([]);
+    const [activeBoardId, setActiveBoardId] = useState<string | null>(null);
 
-    // Какая доска сейчас выбрана
-    const [activeBoardId, setActiveBoardId] = useState<string>(boards[0].id);
+    useEffect(() => {
+        fetchBoards()
+            .then(res => {
+                setBoards(res.data);
+                if (res.data.length > 0) {
+                    setActiveBoardId(res.data[0].id);
+                }
+            })
+            .catch(err => console.error('Failed to load boards', err));
+    }, []);
 
-    const activeBoard = boards.find((b) => b.id === activeBoardId);
+    const activeBoard = boards.find((b) => b.id === activeBoardId) || null;
 
     // Обновить колонки в активной доске
     const setColumnsForActiveBoard = (columns: ColumnType[]) => {
@@ -74,26 +59,40 @@ const App: React.FC = () => {
             title,
             columns: [],
         };
-        setBoards((prev) => [...prev, newBoard]);
-        setActiveBoardId(newBoard.id);
+        createBoard(newBoard)
+            .then((res) => {
+                setBoards((prev) => [...prev, res.data]);
+                setActiveBoardId(res.data.id);
+            })
+            .catch((err) => console.error('Failed to create board', err));
     };
 
     // Редактировать заголовок доски
     const editBoardTitle = (boardId: string, newTitle: string) => {
-        setBoards((prev) =>
-            prev.map((b) =>
-                b.id === boardId ? { ...b, title: newTitle } : b
-            )
-        );
+        updateBoard(boardId, { title: newTitle })
+            .then(() => {
+                setBoards((prev) =>
+                    prev.map((b) =>
+                        b.id === boardId ? { ...b, title: newTitle } : b
+                    )
+                );
+            })
+            .catch((err) => console.error('Failed to update board', err));
     };
 
     // Удалить доску
     const deleteBoard = (boardId: string) => {
-        const filtered = boards.filter((b) => b.id !== boardId);
-        setBoards(filtered);
-        if (filtered.length > 0) {
-            setActiveBoardId(filtered[0].id);
-        }
+        deleteBoardApi(boardId)
+            .then(() => {
+                const filtered = boards.filter((b) => b.id !== boardId);
+                setBoards(filtered);
+                if (filtered.length > 0) {
+                    setActiveBoardId(filtered[0].id);
+                } else {
+                    setActiveBoardId(null);
+                }
+            })
+            .catch((err) => console.error('Failed to delete board', err));
     };
 
     return (

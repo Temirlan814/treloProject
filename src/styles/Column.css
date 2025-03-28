@@ -45,9 +45,14 @@
 
 .edit-column-title {
     display: flex;
+    flex-direction: column;
     gap: 6px;
 }
 
+.edit-column-buttons {
+    display: flex;
+    gap: 6px;
+}
 .tasks-container {
     flex: 1;
     padding: 10px;

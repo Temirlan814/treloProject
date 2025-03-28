@@ -5,15 +5,19 @@ import { ColumnType, TaskType } from '../App';
 import TaskCard from './TaskCard';
 import TaskModal from './TaskModal';
 import '../styles/Column.css';
+import {deleteColumnFromBoard, updateColumnTitle} from "../api/ColumnApi.ts";
+import {addTaskToColumn} from "../api/TaskApi.ts";
 
 interface ColumnProps {
+    boardId: string;
     column: ColumnType;
     index: number;
     allColumns: ColumnType[];
     setColumns: (cols: ColumnType[]) => void;
 }
 
-const Column: React.FC<ColumnProps> = ({ column, index, allColumns, setColumns }) => {
+
+const Column: React.FC<ColumnProps> = ({boardId, column, index, allColumns, setColumns }) => {
     const [showMenu, setShowMenu] = useState(false);
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [tempTitle, setTempTitle] = useState(column.title);
@@ -21,18 +25,19 @@ const Column: React.FC<ColumnProps> = ({ column, index, allColumns, setColumns }
     const tasksContainerRef = useRef<HTMLDivElement | null>(null);
 
     const handleDeleteColumn = () => {
-        const newCols = allColumns.filter((c) => c.id !== column.id);
-        setColumns(newCols);
+        deleteColumnFromBoard(boardId, column.id, allColumns, setColumns);
+
     };
+
 
     const saveColumnTitle = () => {
         if (!tempTitle.trim()) return;
-        const newCols = allColumns.map((c) =>
-            c.id === column.id ? { ...c, title: tempTitle.trim() } : c
-        );
-        setColumns(newCols);
+
+        updateColumnTitle(boardId, column.id, tempTitle.trim(), allColumns, setColumns);
         setIsEditingTitle(false);
+
     };
+
 
     const addTask = (title: string, description: string, tags: string[]) => {
         const newTask: TaskType = {
@@ -41,10 +46,9 @@ const Column: React.FC<ColumnProps> = ({ column, index, allColumns, setColumns }
             description,
             tags,
         };
-        const newCols = allColumns.map((c) =>
-            c.id === column.id ? { ...c, tasks: [...c.tasks, newTask] } : c
-        );
-        setColumns(newCols);
+        addTaskToColumn(boardId, column.id, newTask, allColumns)
+            .then(updated => setColumns(updated))
+            .catch(err => console.error('Failed to add task', err));
     };
 
     return (
@@ -63,15 +67,17 @@ const Column: React.FC<ColumnProps> = ({ column, index, allColumns, setColumns }
                                     value={tempTitle}
                                     onChange={(e) => setTempTitle(e.target.value)}
                                 />
-                                <button onClick={saveColumnTitle}>Save</button>
-                                <button
-                                    onClick={() => {
-                                        setIsEditingTitle(false);
-                                        setTempTitle(column.title);
-                                    }}
-                                >
-                                    Cancel
-                                </button>
+                                <div className="edit-column-buttons">
+                                    <button onClick={saveColumnTitle}>Save</button>
+                                    <button
+                                        onClick={() => {
+                                            setIsEditingTitle(false);
+                                            setTempTitle(column.title);
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             <>
@@ -119,6 +125,7 @@ const Column: React.FC<ColumnProps> = ({ column, index, allColumns, setColumns }
                             >
                                 {column.tasks.map((task, taskIndex) => (
                                     <TaskCard
+                                        boardId={boardId} // ✅ передаём сюда
                                         key={task.id}
                                         task={task}
                                         index={taskIndex}

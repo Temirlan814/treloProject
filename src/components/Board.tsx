@@ -5,6 +5,7 @@ import { BoardType, ColumnType } from '../App';
 import Column from './Column';
 import '../styles/Board.css';
 import {useHorizontalScroll} from "./useHorizontalScroll.tsx";
+import {addColumnToBoard, updateColumnsInBoard} from "../api/ColumnApi.ts";
 
 interface BoardProps {
     board: BoardType;
@@ -64,65 +65,61 @@ const Board: React.FC<BoardProps> = ({ board, setColumns }) => {
         const { source, destination, type } = result;
         if (!destination) return;
 
-        // ✅ Проверяем, не изменилась ли destination из-за скролла
-        const correctDestinationId = document.elementFromPoint(pointerOffsetRef.current?.x || 0, pointerOffsetRef.current?.y || 0)?.closest("[data-rbd-droppable-id]")?.getAttribute("data-rbd-droppable-id");
+        const correctDestinationId = document
+            .elementFromPoint(pointerOffsetRef.current?.x || 0, pointerOffsetRef.current?.y || 0)
+            ?.closest("[data-rbd-droppable-id]")
+            ?.getAttribute("data-rbd-droppable-id");
 
         if (correctDestinationId && correctDestinationId !== destination.droppableId) {
-            console.warn(`Корректируем destination: ${destination.droppableId} -> ${correctDestinationId}`);
-            destination.droppableId = correctDestinationId; // Обновляем на реальную колонку
+            destination.droppableId = correctDestinationId;
         }
+
+        let newCols = [...board.columns];
 
         if (type === "COLUMN") {
-            const newCols = [...board.columns];
             const [moved] = newCols.splice(source.index, 1);
             newCols.splice(destination.index, 0, moved);
-            setColumns(newCols);
-            return;
-        }
-
-        const startColIndex = board.columns.findIndex(c => c.id === source.droppableId);
-        const endColIndex = board.columns.findIndex(c => c.id === destination.droppableId);
-        if (startColIndex < 0 || endColIndex < 0) return;
-
-        const startCol = board.columns[startColIndex];
-        const endCol = board.columns[endColIndex];
-
-        if (startCol.id === endCol.id) {
-            const newTasks = [...startCol.tasks];
-            const [movedTask] = newTasks.splice(source.index, 1);
-            const safeIndex = Math.min(destination.index, newTasks.length);
-            newTasks.splice(safeIndex, 0, movedTask);
-
-            const updatedCol = { ...startCol, tasks: newTasks };
-            const newCols = [...board.columns];
-            newCols[startColIndex] = updatedCol;
-            setColumns(newCols);
         } else {
-            const startTasks = [...startCol.tasks];
-            const [movedTask] = startTasks.splice(source.index, 1);
-            const endTasks = [...endCol.tasks];
+            const startColIndex = newCols.findIndex(c => c.id === source.droppableId);
+            const endColIndex = newCols.findIndex(c => c.id === destination.droppableId);
+            if (startColIndex < 0 || endColIndex < 0) return;
 
-            let insertIndex = destination.index;
-            if (pointerOffsetRef.current) {
-                const columnElement = document.querySelector(`[data-rbd-droppable-id="${destination.droppableId}"]`);
-                if (columnElement) {
-                    const rect = columnElement.getBoundingClientRect();
-                    const relativeY = pointerOffsetRef.current.y - rect.top;
-                    insertIndex = Math.round((relativeY / rect.height) * endTasks.length);
+            const startCol = newCols[startColIndex];
+            const endCol = newCols[endColIndex];
+
+            if (startCol.id === endCol.id) {
+                const newTasks = [...startCol.tasks];
+                const [movedTask] = newTasks.splice(source.index, 1);
+                const safeIndex = Math.min(destination.index, newTasks.length);
+                newTasks.splice(safeIndex, 0, movedTask);
+
+                newCols[startColIndex] = { ...startCol, tasks: newTasks };
+            } else {
+                const startTasks = [...startCol.tasks];
+                const [movedTask] = startTasks.splice(source.index, 1);
+                const endTasks = [...endCol.tasks];
+
+                let insertIndex = destination.index;
+                if (pointerOffsetRef.current) {
+                    const columnElement = document.querySelector(`[data-rbd-droppable-id="${destination.droppableId}"]`);
+                    if (columnElement) {
+                        const rect = columnElement.getBoundingClientRect();
+                        const relativeY = pointerOffsetRef.current.y - rect.top;
+                        insertIndex = Math.round((relativeY / rect.height) * endTasks.length);
+                    }
                 }
+
+                const safeIndex = Math.min(insertIndex, endTasks.length);
+                endTasks.splice(safeIndex, 0, movedTask);
+
+                newCols[startColIndex] = { ...startCol, tasks: startTasks };
+                newCols[endColIndex] = { ...endCol, tasks: endTasks };
             }
-
-            const safeIndex = Math.min(insertIndex, endTasks.length);
-            endTasks.splice(safeIndex, 0, movedTask);
-
-            const newStart = { ...startCol, tasks: startTasks };
-            const newEnd = { ...endCol, tasks: endTasks };
-
-            const newCols = [...board.columns];
-            newCols[startColIndex] = newStart;
-            newCols[endColIndex] = newEnd;
-            setColumns(newCols);
         }
+
+        setColumns(newCols);
+        updateColumnsInBoard(board.id, newCols) // ✅ сохраняем в базу
+            .catch(err => console.error('Failed to sync task changes to API', err));
     };
 
 
@@ -134,7 +131,7 @@ const Board: React.FC<BoardProps> = ({ board, setColumns }) => {
             title: newColTitle.trim(),
             tasks: [],
         };
-        setColumns([...board.columns, newColumn]);
+        addColumnToBoard(board.id, newColumn, board.columns, setColumns);
         setNewColTitle('');
         setShowAddColForm(false);
     };
@@ -172,7 +169,15 @@ const Board: React.FC<BoardProps> = ({ board, setColumns }) => {
                             columnsContainerRef.current = node;
                         }} {...provided.droppableProps}>
                             {board.columns.map((col, index) => (
-                                <Column key={col.id} column={col} index={index} allColumns={board.columns} setColumns={setColumns} />
+                                <Column
+                                    key={col.id}
+                                    boardId={board.id}
+                                    column={col}
+                                    index={index}
+                                    allColumns={board.columns}
+                                    setColumns={setColumns}
+                                />
+
                             ))}
                             {provided.placeholder}
                         </div>
