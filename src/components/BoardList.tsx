@@ -1,7 +1,7 @@
-// src/components/BoardList.tsx
 import React, { useState } from 'react';
 import { BoardType } from '../App';
 import '../styles/BoardList.css';
+import { useTheme } from '../context/ThemeContext.tsx'; // ✅ Подключили ThemeContext
 
 interface BoardListProps {
     boards: BoardType[];
@@ -22,9 +22,10 @@ const BoardList: React.FC<BoardListProps> = ({
                                              }) => {
     const [showAddForm, setShowAddForm] = useState(false);
     const [newBoardTitle, setNewBoardTitle] = useState('');
-
     const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
     const [editingTitle, setEditingTitle] = useState('');
+
+    const { theme, toggleTheme } = useTheme(); // ✅ Используем тему
 
     const openAddForm = () => setShowAddForm(true);
     const closeAddForm = () => {
@@ -57,14 +58,21 @@ const BoardList: React.FC<BoardListProps> = ({
         <div className="sidebar">
             <h2>Boards</h2>
 
-            {/* Кнопка + Add Board */}
+            {/* ✅ Переключатель темы (иконка 🌙 / 🌞) */}
+            <button
+                onClick={toggleTheme}
+                className="theme-toggle-button"
+                title="Toggle theme"
+            >
+                {theme === 'light' ? '🌙' : '🌞'}
+            </button>
+
             {!showAddForm && (
                 <button className="add-board-button" onClick={openAddForm}>
                     + Add Board
                 </button>
             )}
 
-            {/* Форма добавления доски */}
             {showAddForm && (
                 <div className="add-board-form">
                     <input
@@ -83,14 +91,11 @@ const BoardList: React.FC<BoardListProps> = ({
                     </div>
                 </div>
             )}
-
             <ul className="boards-list">
                 {boards.map((board) => (
                     <li
                         key={board.id}
-                        className={`board-item ${
-                            board.id === activeBoardId ? 'active-board' : ''
-                        }`}
+                        className={`board-item ${board.id === activeBoardId ? 'active-board' : ''}`}
                         onClick={() => setActiveBoardId(board.id)}
                     >
                         {editingBoardId === board.id ? (
@@ -139,5 +144,4 @@ const BoardList: React.FC<BoardListProps> = ({
         </div>
     );
 };
-
-export default BoardList;
+export default React.memo(BoardList);

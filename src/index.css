@@ -1,5 +1,22 @@
-/* Можно обнулить стили или подключить reset/normalize.
-   Либо оставить пустым, если не нужно. */
+:root {
+  --bg: #f9f9f9;
+  --text: #333;
+  --card-bg: #fff;
+  --border: #ddd;
+}
+
+body[data-theme='dark'] {
+  --bg: #1e1e1e;
+  --text: #f9f9f9;
+  --card-bg: #2c2c2c;
+  --border: #444;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
 * {
   margin: 0;
   padding: 0;

@@ -12,12 +12,13 @@
 }
 
 .modal-content {
-    background-color: #fff;
+    background-color: var(--card-bg);
     width: 400px;
     max-width: 90%;
     padding: 20px;
     border-radius: 8px;
     position: relative;
+    color: var(--text);
 }
 
 .modal-content h2 {
@@ -40,6 +41,9 @@
     width: 100%;
     box-sizing: border-box;
     padding: 8px;
+    background-color: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
 }
 
 .tags-row {
@@ -76,9 +80,9 @@
 }
 
 .white-button {
-    background-color: #fff;
-    color: #000;
-    border: 1px solid #ccc;
+    background-color: var(--card-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
     padding: 6px 12px;
     cursor: pointer;
     border-radius: 4px;

@@ -1,16 +1,17 @@
 .column {
-    background-color: #fff;
-    border: 1px solid #ddd;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 6px;
     min-width: 250px;
     display: flex;
     flex-direction: column;
+    color: var(--text);
 }
 
 .column-header {
     position: relative;
     padding: 10px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -28,8 +29,8 @@
     position: absolute;
     top: 40px;
     right: 10px;
-    background: #fff;
-    border: 1px solid #ddd;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 4px;
     z-index: 10;
 }
@@ -53,6 +54,7 @@
     display: flex;
     gap: 6px;
 }
+
 .tasks-container {
     flex: 1;
     padding: 10px;
@@ -63,7 +65,7 @@
     text-align: center;
     background-color: #f4f4f4;
     cursor: pointer;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--border);
 }
 
 .add-task-button:hover {
