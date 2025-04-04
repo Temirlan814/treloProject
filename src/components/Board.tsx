@@ -1,7 +1,7 @@
 // src/components/Board.tsx
 import React, { useRef, useState,  } from 'react';
 import {DragDropContext, DropResult, Droppable, DragUpdate, DragStart} from '@hello-pangea/dnd';
-import { BoardType, ColumnType } from '../App';
+import { BoardType, ColumnType } from '../types';
 import Column from './Column';
 import '../styles/Board.css';
 import {useHorizontalScroll} from "./useHorizontalScroll.tsx";

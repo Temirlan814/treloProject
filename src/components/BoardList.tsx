@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { BoardType } from '../App';
+import { useNavigate } from 'react-router-dom'; // ✅ добавлен navigate
+import { BoardType } from '../types'; // ✅ теперь импорт из types.ts
 import '../styles/BoardList.css';
-import { useTheme } from '../context/ThemeContext.tsx'; // ✅ Подключили ThemeContext
+import { useTheme } from '../context/ThemeContext.tsx';
 
 interface BoardListProps {
     boards: BoardType[];
@@ -15,7 +16,7 @@ interface BoardListProps {
 const BoardList: React.FC<BoardListProps> = ({
                                                  boards,
                                                  activeBoardId,
-                                                 setActiveBoardId,
+
                                                  addBoard,
                                                  editBoardTitle,
                                                  deleteBoard,
@@ -25,7 +26,8 @@ const BoardList: React.FC<BoardListProps> = ({
     const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
     const [editingTitle, setEditingTitle] = useState('');
 
-    const { theme, toggleTheme } = useTheme(); // ✅ Используем тему
+    const { theme, toggleTheme } = useTheme();
+    const navigate = useNavigate(); // ✅ навигация по клику
 
     const openAddForm = () => setShowAddForm(true);
     const closeAddForm = () => {
@@ -58,7 +60,7 @@ const BoardList: React.FC<BoardListProps> = ({
         <div className="sidebar">
             <h2>Boards</h2>
 
-            {/* ✅ Переключатель темы (иконка 🌙 / 🌞) */}
+            {/* Иконка смены темы */}
             <button
                 onClick={toggleTheme}
                 className="theme-toggle-button"
@@ -96,7 +98,7 @@ const BoardList: React.FC<BoardListProps> = ({
                     <li
                         key={board.id}
                         className={`board-item ${board.id === activeBoardId ? 'active-board' : ''}`}
-                        onClick={() => setActiveBoardId(board.id)}
+                        onClick={() => navigate(`/board/${board.id}`)} // ✅ заменили setActiveBoardId
                     >
                         {editingBoardId === board.id ? (
                             <div className="edit-board-title">

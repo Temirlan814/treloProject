@@ -1,7 +1,7 @@
 // src/components/TaskCard.tsx
 import React, { useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
-import { ColumnType, TaskType } from '../App';
+import { ColumnType, TaskType } from '../types.ts';
 import TaskModal from './TaskModal';
 import '../styles/TaskCard.css';
 import {deleteTaskFromColumn, updateTaskInColumn} from "../api/TaskApi.ts";

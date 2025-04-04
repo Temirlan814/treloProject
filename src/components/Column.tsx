@@ -1,7 +1,7 @@
 // src/components/Column.tsx
 import React, { useState, useRef } from 'react';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import { ColumnType, TaskType } from '../App';
+import { ColumnType, TaskType } from '../types.ts';
 import TaskCard from './TaskCard';
 import TaskModal from './TaskModal';
 import '../styles/Column.css';
