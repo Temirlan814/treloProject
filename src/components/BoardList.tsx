@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // ✅ добавлен navigate
-import { BoardType } from '../types'; // ✅ теперь импорт из types.ts
+import { useNavigate } from 'react-router-dom';
+import { BoardType } from '../types';
 import '../styles/BoardList.css';
 import { useTheme } from '../context/ThemeContext.tsx';
 

@@ -1,5 +1,5 @@
 import api from './ApiClient';
-import { ColumnType, TaskType } from '../App';
+import { ColumnType, TaskType } from '../types.ts';
 
 // Обновить колонки после модификации задач
 const updateTasksInColumn = async (

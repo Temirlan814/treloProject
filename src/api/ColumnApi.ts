@@ -1,4 +1,4 @@
-import { ColumnType } from '../App';
+import { ColumnType } from '../types.ts';
 import api from './ApiClient';
 
 // Обновить все колонки внутри конкретной доски

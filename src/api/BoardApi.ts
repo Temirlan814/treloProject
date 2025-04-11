@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BoardType } from '../App.tsx';
+import { BoardType } from '../types.ts';
 
 const boardApi = axios.create({
     baseURL: 'http://localhost:4000',
@@ -11,11 +11,12 @@ export const fetchBoards = () => {
 };
 
 // Если в будущем нужно будет добавлять, редактировать или удалять доски:
-export const createBoard = (board: BoardType) => {
+export const createBoardApi = (board: BoardType) => {
+    console.log(board);
     return boardApi.post('/boards', board);
 };
 
-export const updateBoard = (id: string, updatedBoard: Partial<BoardType>) => {
+export const updateBoardApi = (id: string, updatedBoard: Partial<BoardType>) => {
     return boardApi.patch(`/boards/${id}`, updatedBoard);
 };
 
