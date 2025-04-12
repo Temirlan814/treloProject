@@ -1,11 +1,10 @@
-// src/components/Column.tsx
-import React, { useState, useRef } from 'react';
+import React, {useState, useRef} from 'react';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { ColumnType, TaskType } from '../types.ts';
 import TaskCard from './TaskCard';
 import TaskModal from './TaskModal';
 import '../styles/Column.css';
-import { useAppDispatch, useAppSelector } from '../hooks';
+import { useAppDispatch } from '../hooks';
 import { deleteColumn, updateColumn } from '../actions/columnActions';
 import { addTask } from '../actions/taskActions';
 
@@ -23,10 +22,11 @@ const Column: React.FC<ColumnProps> = ({ boardId, column, index }) => {
     const [showAddTaskModal, setShowAddTaskModal] = useState(false);
     const tasksContainerRef = useRef<HTMLDivElement | null>(null);
 
-    const currentBoard = useAppSelector((state) =>
-        state.boards.boards.find((b) => b.id === boardId)
-    );
-    const columns = currentBoard?.columns || [];
+    // const currentBoard = useAppSelector((state) =>
+    //     state.boards.boards.find((b) => b.id === boardId)
+    // );
+    // const columns = currentBoard?.columns || [];
+
 
     const handleDeleteColumn = () => {
         dispatch(deleteColumn(boardId, column.id));
@@ -126,6 +126,7 @@ const Column: React.FC<ColumnProps> = ({ boardId, column, index }) => {
                             >
                                 {column.tasks.map((task, taskIndex) => (
                                     <TaskCard
+                                        key={`${task.id}-${taskIndex}`}
                                         boardId={boardId}
                                         task={task}
                                         index={taskIndex}

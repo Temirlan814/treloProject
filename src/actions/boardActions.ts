@@ -17,7 +17,7 @@ export const UPDATE_BOARD = 'UPDATE_BOARD';
 
 export const fetchBoards = () => async (dispatch: Dispatch) => {
     try {
-        const response = await fetchBoardsApi();  // Вызов API для получения досок
+        const response = await fetchBoardsApi();
         dispatch({ type: FETCH_BOARDS, payload: response.data });
     } catch (error) {
         console.error('Failed to fetch boards', error);
@@ -40,8 +40,8 @@ export const addBoard = (board: BoardType): AppThunk<Promise<BoardType>> => {
 export const replaceColumns = (boardId: string, newColumns: ColumnType[]): AppThunk => {
     return async dispatch => {
         try {
-            await updateColumnsInBoard(boardId, newColumns);
             dispatch({ type: REPLACE_COLUMNS, payload: { boardId, newColumns } });
+            await updateColumnsInBoard(boardId, newColumns);
         } catch (error) {
             console.error('Failed to replace columns', error);
         }
@@ -49,7 +49,7 @@ export const replaceColumns = (boardId: string, newColumns: ColumnType[]): AppTh
 };
 export const deleteBoard = (boardId: string) => async (dispatch: Dispatch) => {
     try {
-        await deleteBoardApi(boardId);  // Вызов API для удаления доски
+        await deleteBoardApi(boardId);
         dispatch({ type: DELETE_BOARD, payload: boardId });
     } catch (error) {
         console.error('Failed to delete board', error);

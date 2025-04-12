@@ -1,7 +1,6 @@
 import api from './ApiClient';
 import { ColumnType, TaskType } from '../types.ts';
 
-// Обновить колонки после модификации задач
 const updateTasksInColumn = async (
     boardId: string,
     updatedColumns: ColumnType[]
@@ -9,7 +8,6 @@ const updateTasksInColumn = async (
     await api.patch(`/boards/${boardId}`, { columns: updatedColumns });
 };
 
-// Добавить задачу в колонку
 export const addTaskToColumn = async (
     boardId: string,
     columnId: string,
@@ -23,7 +21,6 @@ export const addTaskToColumn = async (
     return updatedColumns;
 };
 
-// Удалить задачу из колонки
 export const deleteTaskFromColumn = async (
     boardId: string,
     columnId: string,
@@ -37,7 +34,6 @@ export const deleteTaskFromColumn = async (
     return updatedColumns;
 };
 
-// Обновить задачу (заголовок, описание, теги)
 export const updateTaskInColumn = async (
     boardId: string,
     columnId: string,

@@ -27,7 +27,7 @@ const BoardList: React.FC<BoardListProps> = ({
     const [editingTitle, setEditingTitle] = useState('');
 
     const { theme, toggleTheme } = useTheme();
-    const navigate = useNavigate(); // ✅ навигация по клику
+    const navigate = useNavigate();
 
     const openAddForm = () => setShowAddForm(true);
     const closeAddForm = () => {
@@ -98,7 +98,7 @@ const BoardList: React.FC<BoardListProps> = ({
                     <li
                         key={board.id}
                         className={`board-item ${board.id === activeBoardId ? 'active-board' : ''}`}
-                        onClick={() => navigate(`/board/${board.id}`)} // ✅ заменили setActiveBoardId
+                        onClick={() => navigate(`/board/${board.id}`)}
                     >
                         {editingBoardId === board.id ? (
                             <div className="edit-board-title">

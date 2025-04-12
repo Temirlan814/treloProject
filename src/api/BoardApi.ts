@@ -5,12 +5,10 @@ const boardApi = axios.create({
     baseURL: 'http://localhost:4000',
 });
 
-// Получение всех досок
 export const fetchBoards = () => {
     return boardApi.get<BoardType[]>('/boards');
 };
 
-// Если в будущем нужно будет добавлять, редактировать или удалять доски:
 export const createBoardApi = (board: BoardType) => {
     console.log(board);
     return boardApi.post('/boards', board);

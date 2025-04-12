@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { BoardType, ColumnType } from '../types';
+import { BoardType } from '../types';
 import Board from './Board';
 import BoardList from './BoardList';
 import { addBoard, deleteBoard, updateBoard, fetchBoards } from '../actions/boardActions';
@@ -19,10 +19,7 @@ const SingleBoardView: React.FC = () => {
         }
     }, [dispatch, boards.length]);
 
-    const setColumns = (columns: ColumnType[]) => {
-        if (!board) return;
-        dispatch(updateBoard(board.id, { columns }));
-    };
+
 
     const handleAddBoard = (title: string) => {
         const newBoard: BoardType = { id: 'board-' + Date.now(), title, columns: [] };
@@ -39,7 +36,6 @@ const SingleBoardView: React.FC = () => {
 
     const handleDeleteBoard = (boardId: string) => {
         dispatch(deleteBoard(boardId)).then(() => {
-            navigate('/');
         });
     };
 

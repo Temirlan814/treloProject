@@ -5,7 +5,7 @@ export interface IUseScroll {
     isScrollAllowed: boolean;
 }
 
-const BOUND_WIDTH = 50; // Зона у края экрана, где активируется скролл
+const BOUND_WIDTH = 50;
 
 function getScrollDirection({
                                 position,
@@ -35,7 +35,7 @@ export const useHorizontalScroll = (ref: RefObject<HTMLElement | null>) => {
     });
 
     const scrollTimer = useRef<number | null>(null);
-    const scrollSpeed = 10; // Скорость скролла
+    const scrollSpeed = 10;
     const { position, isScrollAllowed } = config;
 
     useEffect(() => {

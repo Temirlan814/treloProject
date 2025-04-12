@@ -1,52 +1,43 @@
-// src/actions/taskActions.ts
 import { TaskType } from '../types';
 import { AppThunk } from './store';
 import { addTaskToColumn, deleteTaskFromColumn, updateTaskInColumn } from '../api/TaskApi';
-
-export const ADD_TASK = 'ADD_TASK';
-export const DELETE_TASK = 'DELETE_TASK';
-export const UPDATE_TASK = 'UPDATE_TASK';
-export const MOVE_TASK = 'MOVE_TASK';
+import { replaceColumns } from './boardActions';
 
 export const addTask = (
     boardId: string,
     columnId: string,
     task: TaskType
-): AppThunk<Promise<void>> => { // Указываем возвращаемый тип
+): AppThunk<Promise<void>> => {
     return async (dispatch, getState) => {
-        try {
-            const columns = getState().boards.boards.find(b => b.id === boardId)?.columns || [];
-            await addTaskToColumn(boardId, columnId, task, columns);
+        const board = getState().boards.boards.find(b => b.id === boardId);
+        if (!board) return;
 
-            dispatch({
-                type: ADD_TASK,
-                payload: { boardId, columnId, task }
-            });
-
-        } catch (error: unknown) { // Явно указываем тип ошибки
-            let errorMessage = 'Failed to add task';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-            throw new Error(errorMessage);
-        }
+        const updatedColumns = board.columns.map(col =>
+            col.id === columnId
+                ? { ...col, tasks: [...col.tasks, task] }
+                : col
+        );
+        dispatch(replaceColumns(boardId, updatedColumns));
+        await addTaskToColumn(boardId, columnId, task, board.columns);
     };
 };
 
-// Для всех actions укажите возвращаемый Promise
 export const deleteTask = (
     boardId: string,
     columnId: string,
     taskId: string
-): AppThunk<Promise<void>> => { // Добавляем возвращаемый тип
+): AppThunk<Promise<void>> => {
     return async (dispatch, getState) => {
-        try {
-            const columns = getState().boards.boards.find(b => b.id === boardId)?.columns || [];
-            await deleteTaskFromColumn(boardId, columnId, taskId, columns);
-            dispatch({ type: DELETE_TASK, payload: { boardId, columnId, taskId } });
-        } catch (error) {
-            throw new Error(error instanceof Error ? error.message : 'Failed to delete task');
-        }
+        const board = getState().boards.boards.find(b => b.id === boardId);
+        if (!board) return;
+
+        const updatedColumns = board.columns.map(col =>
+            col.id === columnId
+                ? { ...col, tasks: col.tasks.filter(t => t.id !== taskId) }
+                : col
+        );
+        dispatch(replaceColumns(boardId, updatedColumns));
+        await deleteTaskFromColumn(boardId, columnId, taskId, board.columns);
     };
 };
 
@@ -55,14 +46,22 @@ export const updateTask = (
     columnId: string,
     taskId: string,
     updatedTask: Partial<TaskType>
-): AppThunk<Promise<void>> => { // Добавляем возвращаемый тип
+): AppThunk<Promise<void>> => {
     return async (dispatch, getState) => {
-        try {
-            const columns = getState().boards.boards.find(b => b.id === boardId)?.columns || [];
-            await updateTaskInColumn(boardId, columnId, taskId, updatedTask, columns);
-            dispatch({ type: UPDATE_TASK, payload: { boardId, columnId, taskId, updatedTask } });
-        } catch (error) {
-            throw new Error(error instanceof Error ? error.message : 'Failed to update task');
-        }
+        const board = getState().boards.boards.find(b => b.id === boardId);
+        if (!board) return;
+
+        const updatedColumns = board.columns.map(col =>
+            col.id === columnId
+                ? {
+                    ...col,
+                    tasks: col.tasks.map(t =>
+                        t.id === taskId ? { ...t, ...updatedTask } : t
+                    ),
+                }
+                : col
+        );
+        dispatch(replaceColumns(boardId, updatedColumns));
+        await updateTaskInColumn(boardId, columnId, taskId, updatedTask, board.columns);
     };
 };

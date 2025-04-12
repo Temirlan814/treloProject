@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { DragDropContext, DropResult, Droppable, DragUpdate, DragStart } from '@hello-pangea/dnd';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import { ColumnType } from '../types';
@@ -20,11 +20,21 @@ const Board: React.FC<BoardProps> = ({ boardId }) => {
     const isDraggingRef = useRef(false);
     const isTaskDraggingRef = useRef(false);
     const dispatch = useAppDispatch();
+
     const board = useAppSelector((state) =>
         state.boards.boards.find((b) => b.id === boardId)
     );
 
-    const columns = board?.columns || [];
+    const columns = useAppSelector((state) =>
+        state.boards.boards.find((b) => b.id === boardId)?.columns || []
+
+    );
+    const [columnsState, setColumnsState] = useState<ColumnType[]>(columns);
+
+    useEffect(() => {
+        setColumnsState(columns);
+    }, [columns]);
+
 
     const { updatePosition } = useHorizontalScroll(columnsContainerRef);
 
@@ -74,7 +84,7 @@ const Board: React.FC<BoardProps> = ({ boardId }) => {
             destination.droppableId = correctDestinationId;
         }
 
-        const newCols = [...columns];
+        const newCols = [...columnsState];
 
         if (type === 'COLUMN') {
             const [moved] = newCols.splice(source.index, 1);
@@ -117,7 +127,7 @@ const Board: React.FC<BoardProps> = ({ boardId }) => {
                 newCols[endColIndex] = { ...endCol, tasks: endTasks };
             }
         }
-
+        setColumnsState(newCols);
         dispatch(replaceColumns(boardId, newCols));
     };
 
@@ -179,7 +189,7 @@ const Board: React.FC<BoardProps> = ({ boardId }) => {
                             }}
                             {...provided.droppableProps}
                         >
-                            {columns.map((col, index) => (
+                            {columnsState.map((col, index) => (
                                 <Column
                                     key={col.id}
                                     boardId={board.id}

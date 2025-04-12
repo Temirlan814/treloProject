@@ -5,8 +5,8 @@
     margin-bottom: 8px;
     padding: 8px;
     cursor: grab;
-    transition: background-color 0.2s;
     position: relative;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .task-card:hover {

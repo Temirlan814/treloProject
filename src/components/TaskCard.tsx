@@ -1,4 +1,3 @@
-// src/components/TaskCard.tsx
 import React, { useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { TaskType } from '../types.ts';
