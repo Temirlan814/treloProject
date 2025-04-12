@@ -5,51 +5,51 @@ import { ColumnType, TaskType } from '../types.ts';
 import TaskCard from './TaskCard';
 import TaskModal from './TaskModal';
 import '../styles/Column.css';
-import {deleteColumnFromBoard, updateColumnTitle} from "../api/ColumnApi.ts";
-import {addTaskToColumn} from "../api/TaskApi.ts";
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { deleteColumn, updateColumn } from '../actions/columnActions';
+import { addTask } from '../actions/taskActions';
 
 interface ColumnProps {
     boardId: string;
     column: ColumnType;
     index: number;
-    allColumns: ColumnType[];
-    setColumns: (cols: ColumnType[]) => void;
 }
 
-
-const Column: React.FC<ColumnProps> = ({boardId, column, index, allColumns, setColumns }) => {
+const Column: React.FC<ColumnProps> = ({ boardId, column, index }) => {
+    const dispatch = useAppDispatch();
     const [showMenu, setShowMenu] = useState(false);
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [tempTitle, setTempTitle] = useState(column.title);
     const [showAddTaskModal, setShowAddTaskModal] = useState(false);
     const tasksContainerRef = useRef<HTMLDivElement | null>(null);
 
+    const currentBoard = useAppSelector((state) =>
+        state.boards.boards.find((b) => b.id === boardId)
+    );
+    const columns = currentBoard?.columns || [];
+
     const handleDeleteColumn = () => {
-        deleteColumnFromBoard(boardId, column.id, allColumns, setColumns);
-
+        dispatch(deleteColumn(boardId, column.id));
     };
-
 
     const saveColumnTitle = () => {
         if (!tempTitle.trim()) return;
-
-        updateColumnTitle(boardId, column.id, tempTitle.trim(), allColumns, setColumns);
+        dispatch(updateColumn(boardId, column.id, tempTitle.trim()));
         setIsEditingTitle(false);
-
     };
 
-
-    const addTask = (title: string, description: string, tags: string[]) => {
+    const handleAddTask = (title: string, description: string, tags: string[]) => {
         const newTask: TaskType = {
-            id: 'task-' + Date.now(),
+            id: `task-${Date.now()}`,
             title,
             description,
             tags,
         };
-        addTaskToColumn(boardId, column.id, newTask, allColumns)
-            .then(updated => setColumns(updated))
-            .catch(err => console.error('Failed to add task', err));
+        dispatch(addTask(boardId, column.id, newTask))
+            .catch((err: Error) => console.error('Failed to add task:', err.message));
+        setShowAddTaskModal(false);
     };
+
 
     return (
         <Draggable draggableId={column.id} index={index}>
@@ -66,6 +66,7 @@ const Column: React.FC<ColumnProps> = ({boardId, column, index, allColumns, setC
                                 <input
                                     value={tempTitle}
                                     onChange={(e) => setTempTitle(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && saveColumnTitle()}
                                 />
                                 <div className="edit-column-buttons">
                                     <button onClick={saveColumnTitle}>Save</button>
@@ -125,13 +126,10 @@ const Column: React.FC<ColumnProps> = ({boardId, column, index, allColumns, setC
                             >
                                 {column.tasks.map((task, taskIndex) => (
                                     <TaskCard
-                                        boardId={boardId} // ✅ передаём сюда
-                                        key={task.id}
+                                        boardId={boardId}
                                         task={task}
                                         index={taskIndex}
-                                        allColumns={allColumns}
                                         columnId={column.id}
-                                        setColumns={setColumns}
                                     />
                                 ))}
                                 {providedTasks.placeholder}
@@ -147,10 +145,10 @@ const Column: React.FC<ColumnProps> = ({boardId, column, index, allColumns, setC
                     {showAddTaskModal && (
                         <TaskModal
                             onClose={() => setShowAddTaskModal(false)}
-                            onSave={(title, desc, tags) => {
-                                addTask(title, desc, tags);
-                                setShowAddTaskModal(false);
-                            }}
+                            onSave={handleAddTask}
+                            initialTitle=""
+                            initialDesc=""
+                            initialTags={[]}
                         />
                     )}
                 </div>

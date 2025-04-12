@@ -1,49 +1,50 @@
-// src/components/Board.tsx
-import React, { useRef, useState,  } from 'react';
-import {DragDropContext, DropResult, Droppable, DragUpdate, DragStart} from '@hello-pangea/dnd';
-import { BoardType, ColumnType } from '../types';
+import React, { useRef, useState } from 'react';
+import { DragDropContext, DropResult, Droppable, DragUpdate, DragStart } from '@hello-pangea/dnd';
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { ColumnType } from '../types';
 import Column from './Column';
 import '../styles/Board.css';
-import {useHorizontalScroll} from "./useHorizontalScroll.tsx";
-import {addColumnToBoard, updateColumnsInBoard} from "../api/ColumnApi.ts";
+import { useHorizontalScroll } from './useHorizontalScroll';
+import { replaceColumns } from '../actions/boardActions.ts';
+import {addColumn} from '../actions/columnActions.ts';
 
 interface BoardProps {
-    board: BoardType;
-    setColumns: (columns: ColumnType[]) => void;
+    boardId: string;
 }
 
-
-const Board: React.FC<BoardProps> = ({ board, setColumns }) => {
+const Board: React.FC<BoardProps> = ({ boardId }) => {
     const [showAddColForm, setShowAddColForm] = useState(false);
     const [newColTitle, setNewColTitle] = useState('');
     const columnsContainerRef = useRef<HTMLDivElement>(null);
     const pointerOffsetRef = useRef<{ x: number; y: number } | null>(null);
     const isDraggingRef = useRef(false);
+    const isTaskDraggingRef = useRef(false);
+    const dispatch = useAppDispatch();
+    const board = useAppSelector((state) =>
+        state.boards.boards.find((b) => b.id === boardId)
+    );
+
+    const columns = board?.columns || [];
+
+    const { updatePosition } = useHorizontalScroll(columnsContainerRef);
 
     const onDragStart = (start: DragStart) => {
-        if (start.type === "DEFAULT") { // TaskCard
+        if (start.type === 'DEFAULT') {
             isTaskDraggingRef.current = true;
-        } else if (start.type === "COLUMN") { // Column
+        } else if (start.type === 'COLUMN') {
             isDraggingRef.current = true;
         }
-        console.log(start.type);
-        document.addEventListener("mousemove", handleMouseMove); // Добавляем обработчик мыши
+        document.addEventListener('mousemove', handleMouseMove);
         updatePosition({ position: pointerOffsetRef.current?.x || 0, isScrollAllowed: true });
     };
 
     const handleMouseMove = (event: MouseEvent) => {
         pointerOffsetRef.current = { x: event.clientX, y: event.clientY };
-
         updatePosition({
             position: pointerOffsetRef.current?.x || 0,
-            isScrollAllowed: isTaskDraggingRef.current || isDraggingRef.current
+            isScrollAllowed: isTaskDraggingRef.current || isDraggingRef.current,
         });
     };
-
-
-    const { updatePosition } = useHorizontalScroll(columnsContainerRef);
-
-    const isTaskDraggingRef = useRef(false); // Новый флаг для задач
 
     const onDragUpdate = (update: DragUpdate) => {
         if (update.destination) {
@@ -52,36 +53,35 @@ const Board: React.FC<BoardProps> = ({ board, setColumns }) => {
 
         updatePosition({
             position: pointerOffsetRef.current?.x || 0,
-            isScrollAllowed: isTaskDraggingRef.current || isDraggingRef.current
+            isScrollAllowed: isTaskDraggingRef.current || isDraggingRef.current,
         });
     };
-
 
     const onDragEnd = (result: DropResult) => {
         isDraggingRef.current = false;
         isTaskDraggingRef.current = false;
-        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener('mousemove', handleMouseMove);
 
         const { source, destination, type } = result;
         if (!destination) return;
 
         const correctDestinationId = document
             .elementFromPoint(pointerOffsetRef.current?.x || 0, pointerOffsetRef.current?.y || 0)
-            ?.closest("[data-rbd-droppable-id]")
-            ?.getAttribute("data-rbd-droppable-id");
+            ?.closest('[data-rbd-droppable-id]')
+            ?.getAttribute('data-rbd-droppable-id');
 
         if (correctDestinationId && correctDestinationId !== destination.droppableId) {
             destination.droppableId = correctDestinationId;
         }
 
-        let newCols = [...board.columns];
+        const newCols = [...columns];
 
-        if (type === "COLUMN") {
+        if (type === 'COLUMN') {
             const [moved] = newCols.splice(source.index, 1);
             newCols.splice(destination.index, 0, moved);
         } else {
-            const startColIndex = newCols.findIndex(c => c.id === source.droppableId);
-            const endColIndex = newCols.findIndex(c => c.id === destination.droppableId);
+            const startColIndex = newCols.findIndex((c) => c.id === source.droppableId);
+            const endColIndex = newCols.findIndex((c) => c.id === destination.droppableId);
             if (startColIndex < 0 || endColIndex < 0) return;
 
             const startCol = newCols[startColIndex];
@@ -92,7 +92,6 @@ const Board: React.FC<BoardProps> = ({ board, setColumns }) => {
                 const [movedTask] = newTasks.splice(source.index, 1);
                 const safeIndex = Math.min(destination.index, newTasks.length);
                 newTasks.splice(safeIndex, 0, movedTask);
-
                 newCols[startColIndex] = { ...startCol, tasks: newTasks };
             } else {
                 const startTasks = [...startCol.tasks];
@@ -101,7 +100,9 @@ const Board: React.FC<BoardProps> = ({ board, setColumns }) => {
 
                 let insertIndex = destination.index;
                 if (pointerOffsetRef.current) {
-                    const columnElement = document.querySelector(`[data-rbd-droppable-id="${destination.droppableId}"]`);
+                    const columnElement = document.querySelector(
+                        `[data-rbd-droppable-id="${destination.droppableId}"]`
+                    );
                     if (columnElement) {
                         const rect = columnElement.getBoundingClientRect();
                         const relativeY = pointerOffsetRef.current.y - rect.top;
@@ -117,31 +118,22 @@ const Board: React.FC<BoardProps> = ({ board, setColumns }) => {
             }
         }
 
-        setColumns(newCols);
-        updateColumnsInBoard(board.id, newCols) // ✅ сохраняем в базу
-            .catch(err => console.error('Failed to sync task changes to API', err));
+        dispatch(replaceColumns(boardId, newCols));
     };
 
-
-
-    const addColumn = () => {
+    const handleAddColumn = () => {
         if (!newColTitle.trim()) return;
         const newColumn: ColumnType = {
             id: `col-${Date.now()}`,
             title: newColTitle.trim(),
             tasks: [],
         };
-        addColumnToBoard(board.id, newColumn, board.columns, setColumns);
+        dispatch(addColumn(boardId, newColumn))
         setNewColTitle('');
         setShowAddColForm(false);
     };
 
-
-
-
-
-
-
+    if (!board) return <div>Board not found</div>;
 
     return (
         <div className="board">
@@ -150,34 +142,50 @@ const Board: React.FC<BoardProps> = ({ board, setColumns }) => {
                 <div className="board-actions">
                     <button className="board-button">Filter</button>
                     {!showAddColForm && (
-                        <button className="board-button" onClick={() => setShowAddColForm(true)}>+ Add Column</button>
+                        <button className="board-button" onClick={() => setShowAddColForm(true)}>
+                            + Add Column
+                        </button>
                     )}
                 </div>
             </div>
             {showAddColForm && (
                 <div className="add-column-form">
-                    <input type="text" placeholder="Column title" value={newColTitle} onChange={(e) => setNewColTitle(e.target.value)} />
-                    <button className="black-button" onClick={addColumn}>Add</button>
-                    <button className="white-button" onClick={() => setShowAddColForm(false)}>Cancel</button>
+                    <input
+                        type="text"
+                        placeholder="Column title"
+                        value={newColTitle}
+                        onChange={(e) => setNewColTitle(e.target.value)}
+                    />
+                    <button className="black-button" onClick={handleAddColumn}>
+                        Add
+                    </button>
+                    <button className="white-button" onClick={() => setShowAddColForm(false)}>
+                        Cancel
+                    </button>
                 </div>
             )}
-            <DragDropContext onDragStart={onDragStart} onDragUpdate={onDragUpdate} onDragEnd={onDragEnd}>
+            <DragDropContext
+                onDragStart={onDragStart}
+                onDragUpdate={onDragUpdate}
+                onDragEnd={onDragEnd}
+            >
                 <Droppable droppableId="all-columns" direction="horizontal" type="COLUMN">
                     {(provided) => (
-                        <div className="columns-container" ref={(node) => {
-                            provided.innerRef(node);
-                            columnsContainerRef.current = node;
-                        }} {...provided.droppableProps}>
-                            {board.columns.map((col, index) => (
+                        <div
+                            className="columns-container"
+                            ref={(node) => {
+                                provided.innerRef(node);
+                                columnsContainerRef.current = node;
+                            }}
+                            {...provided.droppableProps}
+                        >
+                            {columns.map((col, index) => (
                                 <Column
                                     key={col.id}
                                     boardId={board.id}
                                     column={col}
                                     index={index}
-                                    allColumns={board.columns}
-                                    setColumns={setColumns}
                                 />
-
                             ))}
                             {provided.placeholder}
                         </div>

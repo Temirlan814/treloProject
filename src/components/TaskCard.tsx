@@ -1,44 +1,41 @@
 // src/components/TaskCard.tsx
 import React, { useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
-import { ColumnType, TaskType } from '../types.ts';
+import { TaskType } from '../types.ts';
 import TaskModal from './TaskModal';
 import '../styles/TaskCard.css';
-import {deleteTaskFromColumn, updateTaskInColumn} from "../api/TaskApi.ts";
+import { useAppDispatch } from '../hooks';
+import { deleteTask, updateTask } from '../actions/taskActions';
 
 interface TaskCardProps {
     task: TaskType;
     index: number;
-    allColumns: ColumnType[];
     columnId: string;
-    boardId: string; // ← ✅ Добавляем
-    setColumns: (cols: ColumnType[]) => void;
+    boardId: string;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
                                                boardId,
                                                task,
                                                index,
-                                               allColumns,
                                                columnId,
-                                               setColumns,
                                            }) => {
+    const dispatch = useAppDispatch();
     const [showMenu, setShowMenu] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
 
     const handleDelete = () => {
-        deleteTaskFromColumn(boardId, columnId, task.id, allColumns)
-            .then(updated => setColumns(updated))
-            .catch(err => console.error('Failed to delete task', err));
-
+        dispatch(deleteTask(boardId, columnId, task.id))
+            .catch((err: Error) => console.error('Failed to delete task:', err.message));
     };
 
     const handleSaveEdit = (title: string, desc: string, tags: string[]) => {
-        // Обновить задачу в state
-        updateTaskInColumn(boardId, columnId, task.id, { title, description: desc, tags }, allColumns)
-            .then(updated => setColumns(updated))
-            .catch(err => console.error('Failed to update task', err));
-
+        dispatch(updateTask(
+            boardId,
+            columnId,
+            task.id,
+            { title, description: desc, tags }
+        )).catch((err: Error) => console.error('Failed to update task:', err.message));
     };
 
     return (

@@ -1,45 +1,32 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BoardType } from '../types';
-import BoardList from './BoardList';  // Импортируем уже существующий компонент BoardList
-import { createBoardApi, updateBoardApi, deleteBoardApi } from '../api/BoardApi'; // Для взаимодействия с API
+import { useAppDispatch, useAppSelector } from '../hooks.ts';
+import BoardList from './BoardList';
+import { fetchBoards, addBoard, updateBoard, deleteBoard } from '../actions/boardActions';
+import { BoardType } from '../types.ts';
 
-interface BoardListViewProps {
-    boards: BoardType[];
-    setBoards: React.Dispatch<React.SetStateAction<BoardType[]>>;
-}
-
-const BoardListView: React.FC<BoardListViewProps> = ({ boards, setBoards }) => {
+const BoardListView: React.FC = () => {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    const boards = useAppSelector((state) => state.boards.boards);
 
-    const addBoard = (title: string) => {
+    useEffect(() => {
+        dispatch(fetchBoards());
+    }, [dispatch]);
+
+    const handleAddBoard = (title: string) => {
         const newBoard: BoardType = { id: 'board-' + Date.now(), title, columns: [] };
-        createBoardApi(newBoard)
-            .then((res) => {
-                setBoards((prev) => [...prev, res.data]);
-                navigate(`/board/${res.data.id}`);
-            })
-            .catch((err) => console.error('Failed to create board', err));
+        dispatch(addBoard(newBoard)).then((res) => {
+            navigate(`/board/${res.id}`);
+        });
     };
 
-    const editBoardTitle = (boardId: string, newTitle: string) => {
-        updateBoardApi(boardId, { title: newTitle })
-            .then(() => {
-                setBoards((prev) =>
-                    prev.map((b) =>
-                        b.id === boardId ? { ...b, title: newTitle } : b
-                    )
-                );
-            })
-            .catch((err) => console.error('Failed to update board', err));
+    const handleEditBoardTitle = (boardId: string, newTitle: string) => {
+        dispatch(updateBoard(boardId, { title: newTitle }));
     };
 
-    const deleteBoard = (boardId: string) => {
-        deleteBoardApi(boardId)
-            .then(() => {
-                setBoards((prev) => prev.filter((b) => b.id !== boardId));
-            })
-            .catch((err) => console.error('Failed to delete board', err));
+    const handleDeleteBoard = (boardId: string) => {
+        dispatch(deleteBoard(boardId));
     };
 
     return (
@@ -48,9 +35,9 @@ const BoardListView: React.FC<BoardListViewProps> = ({ boards, setBoards }) => {
                 boards={boards}
                 activeBoardId={null}
                 setActiveBoardId={(id) => navigate(`/board/${id}`)}
-                addBoard={addBoard}
-                editBoardTitle={editBoardTitle}
-                deleteBoard={deleteBoard}
+                addBoard={handleAddBoard}
+                editBoardTitle={handleEditBoardTitle}
+                deleteBoard={handleDeleteBoard}
             />
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <h2>← Выберите доску</h2>

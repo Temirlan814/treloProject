@@ -2,7 +2,7 @@ import {
     FETCH_BOARDS,
     ADD_BOARD,
     DELETE_BOARD,
-    UPDATE_BOARD,
+    UPDATE_BOARD, REPLACE_COLUMNS,
 } from '../actions/boardActions';
 import { BoardType } from '../types';
 
@@ -24,6 +24,15 @@ const boardReducer = (state = initialState, action: any): BoardState => {
             return {
                 ...state,
                 boards: state.boards.filter((board) => board.id !== action.payload),
+            };
+        case REPLACE_COLUMNS:
+            return {
+                ...state,
+                boards: state.boards.map(board =>
+                    board.id === action.payload.boardId
+                        ? { ...board, columns: action.payload.newColumns }
+                        : board
+                )
             };
         case UPDATE_BOARD:
             return {
