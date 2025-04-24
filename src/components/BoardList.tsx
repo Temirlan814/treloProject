@@ -5,8 +5,8 @@ import '../styles/BoardList.css';
 
 interface BoardListProps {
     boards: BoardType[];
-    activeBoardId: string;
-    setActiveBoardId: (id: string) => void;
+    activeBoardId: string | null; // Добавьте поддержку null
+    setActiveBoardId: (id: string | null) => void;
     addBoard: (title: string) => void;
     editBoardTitle: (boardId: string, newTitle: string) => void;
     deleteBoard: (boardId: string) => void;

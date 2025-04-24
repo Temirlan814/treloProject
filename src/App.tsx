@@ -53,7 +53,7 @@ const App: React.FC = () => {
     ]);
 
     // Какая доска сейчас выбрана
-    const [activeBoardId, setActiveBoardId] = useState<string>(boards[0].id);
+    const [activeBoardId, setActiveBoardId] = useState<string | null>(boards[0]?.id || null);
 
     const activeBoard = boards.find((b) => b.id === activeBoardId);
 
@@ -91,9 +91,7 @@ const App: React.FC = () => {
     const deleteBoard = (boardId: string) => {
         const filtered = boards.filter((b) => b.id !== boardId);
         setBoards(filtered);
-        if (filtered.length > 0) {
-            setActiveBoardId(filtered[0].id);
-        }
+        setActiveBoardId(filtered.length > 0 ? filtered[0].id : null); // Устанавливаем null, если досок больше нет
     };
 
     return (

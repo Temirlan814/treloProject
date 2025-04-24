@@ -34,7 +34,7 @@ export const useHorizontalScroll = (ref: RefObject<HTMLElement | null>) => {
         isScrollAllowed: false
     });
 
-    const scrollTimer = useRef<number | null>(null);
+    const scrollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
     const scrollSpeed = 10; // Скорость скролла
     const { position, isScrollAllowed } = config;
 
