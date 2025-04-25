@@ -16,3 +16,8 @@ export interface BoardType {
     title: string;
     columns: ColumnType[];
 }
+
+export interface UserType {
+    email: string;
+    password: string;
+}

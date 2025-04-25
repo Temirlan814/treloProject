@@ -1,4 +1,14 @@
 {
+  "users": [
+    {
+      "email": "admin@example.com",
+      "password": "admin123"
+    },
+    {
+      "email": "user@example.com",
+      "password": "user123"
+    }
+  ],
   "boards": [
     {
       "id": "board-1744465645800",
