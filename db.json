@@ -191,6 +191,29 @@
           "tasks": []
         }
       ]
+    },
+    {
+      "id": "board-1745520470004",
+      "title": "board",
+      "columns": [
+        {
+          "id": "col-1745520501876",
+          "title": "что",
+          "tasks": []
+        },
+        {
+          "id": "col-1745520505880",
+          "title": "то",
+          "tasks": [
+            {
+              "id": "task-1745520530670",
+              "title": "ECPC-100",
+              "description": "config",
+              "tags": []
+            }
+          ]
+        }
+      ]
     }
   ]
 }
